@@ -16,7 +16,6 @@ type Task struct {
 	TimeLimit   *time.Time `json:"time_limit"`
 	CompletedAt *time.Time `json:"completed_at"`
 	CreatedAt   time.Time  `json:"created_at"`
-	DeletedAt   *time.Time `json:"deleted_at"`
 }
 type TaskToCreate struct {
 	Body      string     `json:"body"`
@@ -37,12 +36,12 @@ func tasks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	rows, err := db.Query("SELECT id, body, time_limit, completed_at, created_at, deleted_at FROM TASK")
+	rows, err := db.Query("SELECT id, body, time_limit, completed_at, created_at FROM TASK WHERE deleted_at IS NULL")
 
 	var tasks []Task
 	for rows.Next() {
 		var task Task
-		err := rows.Scan(&task.ID, &task.Body, &task.TimeLimit, &task.CompletedAt, &task.CreatedAt, &task.DeletedAt)
+		err := rows.Scan(&task.ID, &task.Body, &task.TimeLimit, &task.CompletedAt, &task.CreatedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
