@@ -24,6 +24,11 @@ type TaskToCreate struct {
 type OnlyID struct {
 	ID int `json:"id"`
 }
+type TaskToUpdate struct {
+	ID        int        `json:"id"`
+	Body      string     `json:"body"`
+	TimeLimit *time.Time `json:"time_limit"`
+}
 
 func tasks(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("postgres", "host=127.0.0.1 port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
@@ -101,9 +106,33 @@ func complete(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func update(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POSTメソッドのみ許可されています", http.StatusMethodNotAllowed)
+		return
+	}
+	var task TaskToUpdate
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	db, err := sql.Open("postgres", "host=127.0.0.1 port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
+	defer db.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	id := task.ID
+
+	db.QueryRow("UPDATE task SET body = $1, time_limit = $2 WHERE id = $3", task.Body, task.TimeLimit, id)
+}
+
 func main() {
 	http.HandleFunc("/api/tasks", tasks)
 	http.HandleFunc("/api/tasks/create", create)
+	http.HandleFunc("/api/tasks/update", update)
 	http.HandleFunc("/api/tasks/complete", complete)
 	http.ListenAndServe(":8080", nil)
 }
