@@ -119,7 +119,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	log.Println("作成日時:", createdAt)
 }
 
-// complete　指定したIDのタスクを完了する間数
+// complete　指定したIDのタスクを完了する関数
 func complete(w http.ResponseWriter, r *http.Request) {
 	// POSTメソッド以外はエラーを返す
 	if r.Method != http.MethodPost {

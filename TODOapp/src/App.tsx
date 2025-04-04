@@ -35,7 +35,7 @@ function App() {
   const onChangeTimeLimit = (event) => {
     setTime_limit(event);
   }
-  const [editModalIsOpen, setEditModalIsOpen] = useState(false);
+  const [editModalIsOpen, setEditModalIsOpen] = useState<boolean>(false);
 
   const [selectedTask, setSelectedTask] = useState<Task>({
     "id": -1,
@@ -45,6 +45,7 @@ function App() {
     "created_at": ""
   });
 
+  // タスク作成ボタンのクリックハンドラー
   function clickSubmitButton() {
     console.log(body, time_limits);
     // tasksのapiに接続
@@ -61,6 +62,7 @@ function App() {
     console.log("クリックしました")
   }*/
 
+  // タスク更新ボタンのクリックハンドラー
   function clickUpdateButton(id: number) {
     fetch("http://localhost:8080/api/tasks/update", {
       method: "POST",
@@ -71,6 +73,7 @@ function App() {
     }).then(() => getTasks())
   }
 
+  // タスク削除ボタンのクリックハンドラー
   function clickDeleteButton(id: number) {
     fetch("http://localhost:8080/api/tasks/delete", {
       method: "POST",
@@ -81,6 +84,7 @@ function App() {
     }).then(() => getTasks())
   }
 
+  // タスク完了ボタンのクリックハンドラー
   function clickCheckBox (id: number) {
     fetch("http://localhost:8080/api/tasks/complete", {
       method: "POST",
@@ -119,10 +123,10 @@ function App() {
   // ページの表示
   return (
     <>
-      {/* タイトル */}
+      {/* アプリのタイトル */}
       <h1>TODO app</h1>
 
-      {/* タスクの入力画面 */}
+      {/* タスクの入力欄 */}
       <TextField id="outlined-basic" label="Task name" variant="outlined" onChange={onChangeBody} />
 
       {/* 日付の設定画面 */}
@@ -143,16 +147,20 @@ function App() {
             {/* 期限日の表示 */}
             <p>{val.time_limit}</p>
 
-            {/* 編集ボタン */}
+            {/* 編集アイコン */}
             <EditIcon onClick={() => {
               setSelectedTask(val);
               setEditModalIsOpen(true);
             }} />
+            {/* 編集のモーダル */}
             <Modal isOpen={editModalIsOpen}>
-
+              
+              {/* モーダルの閉じるボタン */}
               <Button onClick={() => {
                 setEditModalIsOpen(false);
               }} >X</Button>
+
+              {/* 編集するタスクの入力欄 */}
               <TextField id="outlined-basic" label="Outlined" variant="outlined" defaultValue={selectedTask.body} onChange={onChangeBody} />
 
               {/* 期限日の編集 */}
@@ -160,20 +168,28 @@ function App() {
                 <DatePicker label="Basic date picker" onChange={onChangeTimeLimit} />
               </LocalizationProvider>
 
+              {/* 更新ボタン */}
+              {/* Buttonの表示 */}
               <Button onClick={() => {
                 setEditModalIsOpen(false);
+                {/* タスクの更新 */}
                 clickUpdateButton(selectedTask.id)
               }}>update</Button>
             </Modal>
 
-            {/* 削除ボタン */}
+            {/* 削除アイコン */}
+            {/* DeleteIconの表示 */}
             <DeleteIcon onClick={() => {
-              setSelectedTask(val)
-              clickDeleteButton(selectedTask.id)
+            {/*  */}
+            setSelectedTask(val)
+            {/* タスクの削除 */}
+            clickDeleteButton(selectedTask.id)
             }} />
 
-            {/* チェックボックス */}
+            {/* タスク完了のチェックボックス */}
+            {/* 値が入っていなければCheckBoxOutlineBlankIconをレンダリング(表示)し、クリックすると完了状態に切り替える為の関数を呼ぶ */}
             {!val.completed_at && <CheckBoxOutlineBlankIcon onClick={() => {clickCheckBox(val.id)}} />}
+            {/* 値が入っていればCheckBoxIconをレンダリング(表示)する */}
             {val.completed_at && <CheckBoxIcon />}
           </Card>
         )
