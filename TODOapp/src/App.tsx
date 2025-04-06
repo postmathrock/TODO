@@ -55,6 +55,9 @@ function App() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ "body": body, "time_limit": time_limits })
+    }).then(() => {
+      setBody("");
+      setTime_limit("");
     }).then(() => getTasks())
   }
 /*
@@ -70,6 +73,9 @@ function App() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ "ID": id, "body": body, "time_limit": time_limits })
+    }).then(() => {
+      setBody("");
+      setTime_limit("");
     }).then(() => getTasks())
   }
 
@@ -104,7 +110,23 @@ function App() {
           // tasksにデータをセットする
           .then(data => {
             if(data != null && data != undefined){
+              data.map(task => {
+                const d = new Date(task.time_limit)
+                //console.log(d.getDate())
+                
+                const year = d.getFullYear()
+                const month = d.getMonth() + 1
+                const date = d.getDate()
+
+                task.time_limit = `${year}-${month}-${date}`
+                
+                //const foo = "var"
+                //console.log(`${foo}`);
+                return task
+              })
               setTasks(data);
+            } else {
+              setTasks([]);
             }
           })
           .catch(error => {
@@ -127,12 +149,16 @@ function App() {
       <h1>TODO app</h1>
 
       {/* タスクの入力欄 */}
-      <TextField id="outlined-basic" label="Task name" variant="outlined" onChange={onChangeBody} />
+      {!editModalIsOpen &&(
+        <TextField id="outlined-basic" label="Task name" variant="outlined" onChange={onChangeBody} value={body}/>
+      )}
 
       {/* 日付の設定画面 */}
+      {!editModalIsOpen &&(
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <DatePicker label="Basic date picker" onChange={onChangeTimeLimit} />
+        <DatePicker label="Basic date picker" onChange={onChangeTimeLimit} value={time_limits == "" ? undefined : time_limits} />
       </LocalizationProvider>
+      )}
 
       {/* タスクの送信ボタン */}
       <Button variant="outlined" onClick={clickSubmitButton}>SUBMIT</Button>
@@ -165,7 +191,7 @@ function App() {
 
               {/* 期限日の編集 */}
               <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker label="Basic date picker" onChange={onChangeTimeLimit} />
+                <DatePicker label="Basic date picker" onChange={onChangeTimeLimit} defaultValue={new Date(selectedTask.time_limit)} />
               </LocalizationProvider>
 
               {/* 更新ボタン */}
@@ -180,10 +206,8 @@ function App() {
             {/* 削除アイコン */}
             {/* DeleteIconの表示 */}
             <DeleteIcon onClick={() => {
-            {/*  */}
-            setSelectedTask(val)
             {/* タスクの削除 */}
-            clickDeleteButton(selectedTask.id)
+            clickDeleteButton(val.id)
             }} />
 
             {/* タスク完了のチェックボックス */}
