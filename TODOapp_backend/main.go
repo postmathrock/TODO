@@ -65,6 +65,12 @@ func tasks(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		jst := time.FixedZone("Asia/Tokyo", 9*60*60)
+		nowJST := task.TimeLimit.In(jst)
+
+		task.TimeLimit = &nowJST
+
 		// tasksにtaskを追加
 		tasks = append(tasks, task)
 	}
